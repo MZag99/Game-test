@@ -50,4 +50,21 @@ public class Utils
 
         return titles.list[index + 1];
     }
+
+
+
+    public static bool CheckIfInProgress(Dynasty dynasty, string actionName)
+    {
+        var isInProgress = false;
+
+        dynasty.members.ForEach(member =>
+       {
+           if (member.currentAction != null && member.currentAction.name == actionName)
+           {
+               isInProgress = true;
+           }
+       });
+
+        return isInProgress;
+    }
 }

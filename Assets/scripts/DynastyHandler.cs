@@ -23,6 +23,8 @@ public class DynastyHandler : MonoBehaviour
         var dynastyDataList = prepareDynastyData();
         var helperObj = GameObject.FindGameObjectWithTag("HelperObject");
 
+        helperObj.AddComponent<Actions>();
+
         foreach (var dynasty in dynastyDataList)
         {
             Dynasty instance = helperObj.AddComponent<Dynasty>();

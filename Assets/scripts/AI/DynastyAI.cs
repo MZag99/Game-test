@@ -23,6 +23,8 @@ public class DynastyAI : MonoBehaviour
 
     public void OnGetDecision()
     {
+        List<Person> freeMembers = dynastyInstance.getFreeMembers();
+
         /* 
          * Action type = DYNASTY.
          * If there are available building slots on the map, and the dynasty
@@ -37,7 +39,6 @@ public class DynastyAI : MonoBehaviour
             {
                 dynastyInstance.BuildWorkshop();
             }
-
         }
 
         /* 
@@ -48,7 +49,46 @@ public class DynastyAI : MonoBehaviour
          */
         if (Utils.GetNextDynastyTitle(dynastyInstance).price <= dynastyInstance.dynastyMoney)
         {
+            // Check if some dynasty member is already doing this action
+            if (!Utils.CheckIfInProgress(dynastyInstance, "TITLE_PURCHASE")) {
+                Debug.Log(dynastyInstance.dynastyName + " PURCHASING TITLE!");
 
+                Person delegateMember = freeMembers[Random.Range(0, freeMembers.Count)];
+
+                Actions.GetTitle(delegateMember);
+            }
+        }
+
+        /*
+         * Action type = PERSON.
+         * Action name = WORKING
+         * If both previous actions have failed, delegate free members to go
+         * and work in their workshops.
+         */
+        if (freeMembers.Count > 0)
+        {
+
+            var availableWorkshopTypes = new List<string>();
+
+            dynastyInstance.workshops.ForEach(el =>
+            {
+                if (!availableWorkshopTypes.Contains(el.type))
+                {
+                    availableWorkshopTypes.Add(el.type);
+                }
+            });
+
+            for(int i = 0; i < freeMembers.Count; i++)
+            {
+                if (availableWorkshopTypes.Contains(freeMembers[i].type))
+                {
+                    Debug.Log(freeMembers[i].name + " " + freeMembers[i].dynasty + " is going to work!");
+
+                    var building = dynastyInstance.workshops.Find(el => el.type == freeMembers[i].type);
+                    Actions.Work(freeMembers[i], building);
+                    return;
+                }
+            }
         }
     }
 }

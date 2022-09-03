@@ -7,6 +7,8 @@ TagManager:
   - Household
   - locationMarker
   - HelperObject
+  - Person
+  - CityHall
   layers:
   - Default
   - TransparentFX

@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using UnityEngine.AI;
 using UnityEngine;
 
 public class Person : MonoBehaviour
@@ -13,6 +15,7 @@ public class Person : MonoBehaviour
     public string type;
     public string sex;
 
+    public Dynasty dynastyInstance;
     public Person lover;
     public Person spouse;
 
@@ -21,6 +24,7 @@ public class Person : MonoBehaviour
 
     private List<string> genders = new List<string>() { "male", "female" };
     private List<string> types = new List<string>() { "Scholar", "Craftsman", "Patron", "Rogue" };
+    public List<Building> ownedWorkshops = new List<Building>();
     private NamesObject names = new NamesObject();
 
     public PersonAI AI;
@@ -30,35 +34,49 @@ public class Person : MonoBehaviour
         age = Random.Range(18, 30);
         sex = genders[Random.Range(0, 2)];
         type = types[Random.Range(0, types.Count)];
-        
+
         if (sex == "male")
         {
             name = names.maleNames[Random.Range(0, names.maleNames.Count)];
-        } else
+        }
+        else
         {
             name = names.femaleNames[Random.Range(0, names.femaleNames.Count)];
         }
 
-        initAI();
+        InitAI();
     }
 
 
 
-    void Update()
+    public void MoveTo(GameObject target)
     {
-        
+        Transform goal = target.transform;
+        NavMeshAgent agent = GetComponent<NavMeshAgent>();
+
+        agent.destination = goal.position;
     }
 
 
 
-    public void setAction()
+    public void SetAction(string actionName, int priority)
     {
+        currentAction = new Action(actionName, priority);
+        isBusy = true;
 
     }
 
 
 
-    public void initAI()
+    public void FinishAction()
+    {
+        currentAction = null;
+        isBusy = false;
+    }
+
+
+
+    public void InitAI()
     {
         var helperObj = GameObject.FindGameObjectWithTag("HelperObject");
 

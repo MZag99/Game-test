@@ -13,9 +13,9 @@ public class Dynasty : MonoBehaviour
     public int titleLevel = 0;
     public int maxBuildings = 1; // Does not refer to households, only workshops
 
-    public List<Dynasty> friends = new List<Dynasty> ();
-    public List<Dynasty> neutral = new List<Dynasty> ();
-    public List<Dynasty> enemies = new List<Dynasty> (); 
+    public List<Dynasty> friends = new List<Dynasty>();
+    public List<Dynasty> neutral = new List<Dynasty>();
+    public List<Dynasty> enemies = new List<Dynasty>();
 
     public Vector3 initPos;
     public Color dynastyColor;
@@ -23,9 +23,11 @@ public class Dynasty : MonoBehaviour
 
     public List<string> availableClasses = new List<string>();
     public List<Person> members = new List<Person>();
-    public List<GameObject> buildings = new List<GameObject>();
 
-    private GameObject baseHouseHold;
+    public List<Building> households = new List<Building>();
+    public List<Building> workshops = new List<Building>();
+
+    public GameObject baseHouseHold;
 
 
     public DynastyAI AI;
@@ -39,6 +41,8 @@ public class Dynasty : MonoBehaviour
         dynastyColor = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
         dynastyTitle = titles.list[titleLevel].title;
         baseHouseHold.GetComponent<Renderer>().material.color = dynastyColor;
+
+        households.Add(baseHouseHold.GetComponent<Building>());
 
         createMembers();
         assignHouseHoldOwner();
@@ -81,7 +85,7 @@ public class Dynasty : MonoBehaviour
 
     public void BuildWorkshop()
     {
-        var workshopPrefabs = Resources.LoadAll<GameObject>("prefabs/workshops");
+        var workshopPrefabs = Resources.LoadAll<GameObject>("prefabs/buildings/workshops");
         var locations = Utils.getAvailableLocations();
 
         var chosenLocation = locations[Random.Range(0, locations.Length)];
@@ -89,7 +93,7 @@ public class Dynasty : MonoBehaviour
 
         Utils.ShuffleArray(workshopPrefabs);
 
-        foreach( var workshop in workshopPrefabs)
+        foreach (var workshop in workshopPrefabs)
         {
             Building instance = workshop.GetComponent<Building>();
 
@@ -103,11 +107,13 @@ public class Dynasty : MonoBehaviour
                     if (member.type == instance.type && instance.belongsTo == null)
                     {
                         instance.belongsTo = member;
+                        member.ownedWorkshops.Add(instance);
                     }
                 });
 
                 instance.dynasty = dynastyName;
                 Instantiate(workshop, chosenLocation.transform.position, Quaternion.identity);
+                workshops.Add(workshop.GetComponent<Building>());
 
                 return;
 
@@ -139,6 +145,7 @@ public class Dynasty : MonoBehaviour
             members.Add(instance);
 
             member.GetComponent<Person>().dynasty = dynastyName;
+            member.GetComponent<Person>().dynastyInstance = this;
             member.GetComponent<Renderer>().material.color = dynastyColor;
         }
     }
@@ -147,7 +154,7 @@ public class Dynasty : MonoBehaviour
 
     public void getAvailableClasses()
     {
-        
+
         List<string> classes = new List<string>();
 
         members.ForEach(member =>
